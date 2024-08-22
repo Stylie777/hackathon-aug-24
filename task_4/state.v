@@ -3,7 +3,7 @@
 // Stretch goal:
 // 1: Recovery on corrupted state
 
-module main (
+module arbiter (
     input   wire r1,
     input   wire r2,
     input   wire r3,
@@ -17,10 +17,10 @@ reg [1:0]  STATE;
 reg [3:0]  output_sel;
 
 // State List
-localparam A = 1;   // A: Idle
-localparam B = 2;   // B: r1 active
-localparam C = 3;   // C: r2 active
-localparam D = 4;   // D: r3 active
+localparam A = 0;   // A: Idle
+localparam B = 1;   // B: r1 active
+localparam C = 2;   // C: r2 active
+localparam D = 3;   // D: r3 active
 
 // State Floppers
 always @(*) begin
@@ -41,7 +41,7 @@ always @(*) begin
         STATE   =   B;
     else if(r2 & ~r1)
         STATE   =   C;
-    else if(r3 & ~r2 & ~r1)
+    else if(r3 & (~r2 & ~r1))
         STATE   =   D;
     else
         STATE   =   A;
