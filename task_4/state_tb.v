@@ -1,82 +1,75 @@
 // Please put description here
 
-module main_tb ();
+module fsm_tb ();
 
 // Internal Signal
-reg  r1;
-reg  r2;
-reg  r3;
-wire g1;
-wire g2;
-wire g3;
-reg [1:0] truth;
+reg  [3:1]  r;
+wire [3:1]  g;
+
+reg         clk;
+reg         reset;
+reg  [1:0]  truth;
 
 // Module Instantiation
-arbiter Arbiter_1 (
-    .r1(r1),
-    .r2(r2),
-    .r3(r3),
-    .g1(g1),
-    .g2(g2),
-    .g3(g3)
+fsm_to_test Arbiter_1 (
+    .clk(clk),
+    .resetn(reset),
+    .r(r),
+    .g(g)
 );
+
+// Clock Generation
+always #5 clk=~clk;
 
 // Signal clear
 initial begin
-    r1 = 0;
-    r2 = 0;
-    r3 = 0;
+    clk = 0;
+    r = 3'b000;
+    reset = 0;
     truth = 0;
 end
 
+// Testbench
+initial #1000 $finish;
+
+// Test cases
 initial begin
-    #10
+    #20
+    reset = 1;  // Release reset
     // Case r1
-    r1 = 1;
-    r2 = 0;
-    r3 = 0;
+    r = 3'b001;
     truth = 1;
-    #10;
+    #10
     // Case r2
-    r1 = 0;
-    r2 = 1;
-    r3 = 0;
+    r = 3'b010;
     truth = 2;
     #10
     // Case r3
-    r1 = 0;
-    r2 = 0;
-    r3 = 1;
+    r = 3'b100;
     truth = 3;
     #10
     // Case r1 vs r2
-    r1 = 1;
-    r2 = 1;
-    r3 = 0;
+    r = 3'b011;
     truth = 1;
     #10
     // Case r1 vs r3
-    r1 = 1;
-    r2 = 0;
-    r3 = 1;
+    r = 3'b101;
     truth = 1;
     #10
     // Case r2 vs r3
-    r1 = 0;
-    r2 = 1;
-    r3 = 1;
+    r = 3'b110;
     truth = 2;
     #10
     // Case r1 vs r2 vs r3
-    r1 = 1;
-    r2 = 1;
-    r3 = 1;
+    r = 3'b111;
     truth = 1;
     #10
+    // Case rubbish value
+    r = 3'b1x0;
+    truth = 1'bx;
+    #20
     // Reset
-    r1 = 0;
-    r2 = 0;
-    r3 = 0;
+    reset = 0;
     truth = 0;
 end
 
@@ -84,7 +77,7 @@ end
 initial
 begin
    $dumpfile("test.vcd");
-   $dumpvars(0,main_tb);
+   $dumpvars(0,fsm_tb);
 end
 
 endmodule

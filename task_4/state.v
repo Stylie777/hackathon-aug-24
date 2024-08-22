@@ -3,18 +3,15 @@
 // Stretch goal:
 // 1: Recovery on corrupted state
 
-module arbiter (
-    input   wire r1,
-    input   wire r2,
-    input   wire r3,
-    output  wire g1,
-    output  wire g2,
-    output  wire g3
+module fsm_to_test (
+    input   wire        clk,
+    input   wire        resetn, // Active low, synchronous reset
+    input   wire [3:1]  r,      // Request
+    output  reg  [3:1]  g       // Grant
 );
 
 // Internal Signal
 reg [1:0]  STATE;
-reg [3:0]  output_sel;
 
 // State List
 localparam A = 0;   // A: Idle
@@ -22,34 +19,33 @@ localparam B = 1;   // B: r1 active
 localparam C = 2;   // C: r2 active
 localparam D = 3;   // D: r3 active
 
-// State Floppers
+// State Floppers and Output Driver, combinatorial
 always @(*) begin
     case(STATE)
-    A       :  output_sel = 4'b0000;  // Open unused
-    B       :  output_sel = 4'b0010;
-    C       :  output_sel = 4'b0100;
-    D       :  output_sel = 4'b1000;
-    default :  output_sel = 4'bxxxx;
+    A       :  g = 3'b000;  // Open
+    B       :  g = 3'b001;  // g1
+    C       :  g = 3'b010;  // g2
+    D       :  g = 3'b100;  // g3
+    default :  g = 3'b000;  // Keep open if unknown state
     endcase
 end
 
-// State Table
-// Schedule state change depending on input
+// State Table + Reset Logic, sequential
+// Schedule state change depending on input, synchronous
 // Priority: r1 > r2 > r3
-always @(*) begin
-    if(r1)
-        STATE   =   B;
-    else if(r2 & ~r1)
-        STATE   =   C;
-    else if(r3 & (~r2 & ~r1))
-        STATE   =   D;
-    else
-        STATE   =   A;
+always @(posedge clk) begin
+    if(!resetn)
+        STATE = A;
+    else begin
+        if(r[1])
+            STATE   =   B;
+        else if(r[2] & ~r[1])
+            STATE   =   C;
+        else if(r[3] & (~r[2] & ~r[1]))
+            STATE   =   D;
+        else
+            STATE   =   A;
+    end
 end
-
-// Output Driver
-assign g1 = output_sel[1];
-assign g2 = output_sel[2];
-assign g3 = output_sel[3];
 
 endmodule
