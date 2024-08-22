@@ -27,7 +27,6 @@ struct node{
 using namespace std;
 
 map<string, node *> name_to_node;
-map<node, node> node_to_parent_node;
 vector<string> file_lines;
 
 string extract_deepest_path(node &deepest_node) {
@@ -75,6 +74,10 @@ int main(int argc, char * argv[]) {
         exit(1);
     }
 
+    node *deepest_node;
+    deepest_node = name_to_node.find("/")->second;
+    int total_depth = 0;
+    int no_of_files = 0;
     string s;
     while (getline(file, s)){
         int start,end = 0;
@@ -112,23 +115,16 @@ int main(int argc, char * argv[]) {
         n->depth = depth;
 
         name_to_node[n->name] = n;
-    }
+        if(n->depth > deepest_node->depth)
+            deepest_node = n;
 
-    file.close();
-
-    node *deepest_node;
-    deepest_node = name_to_node.find("/")->second;
-    int total_depth = 0;
-    int no_of_files = 0;
-    for(auto entry : name_to_node) {
-        if(entry.second->depth > deepest_node->depth)
-            deepest_node = entry.second;
-
-        if(entry.second->type == TYPE_FILE) {
-            total_depth += entry.second->depth;
+        if(n->type == TYPE_FILE) {
+            total_depth += n->depth;
             no_of_files++;
         }
     }
+
+    file.close();
 
     string deepest_path = extract_deepest_path(*deepest_node);
 
