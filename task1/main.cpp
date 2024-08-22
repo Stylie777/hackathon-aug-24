@@ -30,10 +30,10 @@ map<string, node *> name_to_node;
 map<node, node> node_to_parent_node;
 vector<string> file_lines;
 
-string extract_deepest_path(node deepest_node) {
+string extract_deepest_path(node &deepest_node) {
     string path;
     path = deepest_node.name;
-    node n = *deepest_node.parent_dir;
+    node &n = *deepest_node.parent_dir;
 
     while (n.parent_dir != nullptr) {
         path = n.name + "/" + path;
