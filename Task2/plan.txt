@@ -1,0 +1,19 @@
+start top right
+directions to avoid left and up
+first prioritise going down, then prioritise going down and then compare.
+
+prioritise going down
+If right < down; go right
+else if right == down; down
+else; go down
+add as we go...
+
+prioritise going right
+if right < down; go right
+else if right == down, go right
+else go down.
+
+then compare the 2 numbers
+
+functions to write
+1. go right or go down
